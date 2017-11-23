@@ -1,0 +1,3 @@
+CLOUD_APPLICATION={{cookiecutter.app_name}}
+CLOUD_STACK={{cookiecutter.app_component_name}}
+CLOUD_DETAIL=

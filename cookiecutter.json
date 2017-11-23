@@ -1,0 +1,25 @@
+{
+  "app_name": "rpm_project_name",
+  "app_component_name": "",
+  "repo_name": "devops-{{cookiecutter.app_name | lower | replace(' ', '-')}}{% if cookiecutter.app_component_name %}-{{cookiecutter.app_component_name | lower | replace(' ', '-')}}{% endif %}",
+  "gradle_version": "2.12",
+  "rpm_publish_artifactory_url": "https://binrepo.devops.com/artifactory",
+  "apply_download_source_plugin": "false",
+  "source_artifact_url": "{{cookiecutter.rpm_publish_artifactory_url}}",
+  "source_artifact_repo": "<INSERT_SOURCE_ARTIFACT_REPO_NAME>",
+  "source_artifact_path": "<INSERT_SOURCE_ARTIFACT_PATH>",
+  "source_artifact_version": "<INSERT_SOURCE_ARTIFACT_VERSION>",
+  "source_artifact_name": "<INSERT_SOURCE_ARTIFACT_NAME>",
+  "rename_source_artifact": "false",
+  "renamed_source_artifact_name": "",
+  "yum_artifactory_publish_repo": "cpe-yum-local",
+  "include_preinstall_script": "false",
+  "include_postinstall_script": "false",
+  "rpm_dependencies": "",
+  "jenkins_or_drone": "jenkins",
+  "_copy_without_render": [
+    "gradlew",
+    "gradlew.bat",
+    "gradle/wrapper/gradle-wrapper.jar"
+  ]
+}

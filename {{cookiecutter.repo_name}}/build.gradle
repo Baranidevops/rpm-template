@@ -1,0 +1,88 @@
+{% if cookiecutter.apply_download_source_plugin == 'true' -%}
+import de.undercouch.gradle.tasks.download.Download
+{%- endif %}
+
+{% if cookiecutter.jenkins_or_drone == 'jenkins' -%}
+buildscript {
+  repositories {
+    maven { url "${artifactoryUrl}/cpe-plugins-release-local/" }
+  }
+  dependencies {
+    classpath "com.tgt.cpe:cpe-rpm-plugins:0.0.3"
+  }
+}
+{%- endif %}
+
+plugins {
+  id 'nebula.ospackage' version '3.4.0'
+  id 'nebula.nebula-release' version '4.0.1'
+  id 'com.jfrog.artifactory' version '4.1.1'
+  id "de.undercouch.download" version "3.0.0"
+}
+
+
+{% if cookiecutter.jenkins_or_drone == 'jenkins' -%}
+apply plugin: 'cpe.rpm.publish'
+{%- endif %}
+
+repositories {
+    maven { url "${artifactoryUrl}/cpe-plugins-release-local/" }
+}
+
+{% if cookiecutter.apply_download_source_plugin == 'true' -%}
+task downloadSource(type: Download) {
+    src "${sourceArtifactUrl}/${sourceArtifactRepository}/${sourceArtifactPath}/${sourceArtifactName}"
+    dest ".downloadedArtifacts/source/${finalSourceArtifactName}"
+    overwrite false
+}
+{% if cookiecutter.jenkins_or_drone == 'jenkins' -%}
+   project.tasks.buildRpm.dependsOn(downloadSource)
+{%- endif %}
+{% if cookiecutter.jenkins_or_drone == 'drone' -%}
+   project.tasks.build.dependsOn(buildRpm)
+{%- endif %}
+
+
+{%- endif %}
+
+buildRpm {
+ {% if cookiecutter.jenkins_or_drone == 'jenkins' -%}
+    packageName "${project.versionConfig.rpmName}"
+    version "${project.versionConfig.rpmVersion}"
+    release "${project.versionConfig.rpmRelease}"
+    arch "${project.versionConfig.rpmArch}"
+    os "${project.versionConfig.rpmOS}"
+ {%- endif %}
+
+ {% if cookiecutter.jenkins_or_drone == 'drone' -%}
+    packageName rpmName
+    version rpmVersion
+    release rpmRelease
+    arch X86_64
+    os LINUX
+ {%- endif %}
+
+  {% if cookiecutter.rpm_dependencies -%}
+  {%- set dependency_list = cookiecutter.rpm_dependencies.split(',') -%}
+  {% for dependency in dependency_list %}
+  requires('{{dependency}}')
+  {% endfor %}
+  {%- endif %}
+
+  {% if cookiecutter.include_preinstall_script == 'true' -%}
+  preInstall file('pkg_scripts/preInstall.sh')
+  {%- endif %}
+  {% if cookiecutter.include_preinstall_script == 'true' -%}
+  postInstall file('pkg_scripts/postInstall.sh')
+  {%- endif %}
+
+  {% if cookiecutter.apply_download_source_plugin == 'true' -%}
+  from(".downloadedArtifacts/source/${finalSourceArtifactName}") {
+    into "/opt/{{cookiecutter.app_name}}"
+    fileMode 0644
+    user 'root'
+    permissionGroup 'root'
+  }
+  {%- endif %}
+
+}

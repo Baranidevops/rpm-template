@@ -1,0 +1,26 @@
+#!/bin/bash
+pmethod=POST
+DRONE_API_URL=https://drone5.devops.com/api
+access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXh0Ijhjgjoia29kZWVzd2FyYW5tYWxhaW11dGh1MiIsInR5cGUiOiJ1c2VyIn0.h14QETj7EcGcdIlM_8DB94MVHcKgo34F3dEnoCgwgqM
+respfile="/Users/a553794/Workspace/RPMs/drone-webhook/repos.json"
+lno=`grep -n "owner" $respfile | cut -f1 -d:`
+echo $lno
+arr=(${lno// /})
+for i in "${!arr[@]}"
+do
+    line=`head -n $((${arr[i]})) $respfile | tail -1`
+    owner=`echo $line | cut -d':' -f2 | sed 's/[ ",]//g'`
+    echo $owner
+    line=`head -n $((${arr[i]}+1)) $respfile | tail -1`
+    repo=`echo $line | cut -d':' -f2  | sed 's/[ ",]//g'`
+    echo $repo
+done
+rescode="curl -X GET $DRONE_API_URL/repos/$owner/$repo?access_token=$access_token"
+echo  $rescode
+if (($rescode > 200))
+then
+   if [ $rescode = "404" ]
+        then
+        curl -X $pmethod $DRONE_API_URL/repos/$owner/$repo?access_token=$access_token
+
+fi
